@@ -21,6 +21,7 @@ public class CardReaderHandler extends HWHandler {
         switch (msg.getType()) {
             case CR_CardInserted:
                 atmss.send(new Msg(id, mbox, Msg.Type.CR_CardInserted, msg.getDetails()));
+                handleCardInsert();
                 break;
 
             case CR_EjectCard:      //receive msg from ATMSS (write in ATMSS a method to send CR_ejectcard msg to card handler)

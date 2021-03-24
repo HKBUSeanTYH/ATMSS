@@ -79,6 +79,11 @@ public class TouchDisplayEmulator extends TouchDisplayHandler {
 	}
     } // handleUpdateDisplay
 
+	protected void handleLogin(){
+    	super.handleLogin();
+    	touchDisplayEmulatorController.setLoginTrue();
+	}
+
 
     //------------------------------------------------------------
     // reloadStage

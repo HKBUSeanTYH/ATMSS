@@ -17,6 +17,8 @@ public class TouchDisplayEmulatorController {
     private TouchDisplayEmulator touchDisplayEmulator;
     private MBox touchDisplayMBox;
 
+    private boolean loggedIn = false;
+
 
     //------------------------------------------------------------
     // initialize
@@ -38,4 +40,14 @@ public class TouchDisplayEmulatorController {
 	log.fine(id + ": mouse clicked: -- (" + x + ", " + y + ")");
 	touchDisplayMBox.send(new Msg(id, touchDisplayMBox, Msg.Type.TD_MouseClicked, x + " " + y));
     } // td_mouseClick
+
+    public void setLoginTrue() {
+        loggedIn = true;
+        touchDisplayMBox.send(new Msg(id, touchDisplayMBox, Msg.Type.TD_UpdateDisplay, "MainMenu"));
+    }
+
+    public void setLoginFalse() {
+        loggedIn = false;
+        //touchDisplayMBox.send(new Msg(id, touchDisplayMBox, Msg.Type.TD_UpdateDisplay, "MainMenu"));
+    }
 } // TouchDisplayEmulatorController

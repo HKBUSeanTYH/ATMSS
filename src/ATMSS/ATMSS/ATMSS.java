@@ -9,6 +9,11 @@ import AppKickstarter.timer.Timer;
 // ATMSS
 public class ATMSS extends AppThread {
     private int pollingTime;
+    private boolean loggedIn = false;
+    private String cardNum ="";
+    private String pin = "";
+    private boolean getPin = false;
+
     private MBox cardReaderMBox;
     private MBox keypadMBox;
     private MBox touchDisplayMBox;
@@ -48,6 +53,7 @@ public class ATMSS extends AppThread {
 		case TD_MouseClicked:
 		    log.info("MouseCLicked: " + msg.getDetails());
 		    processMouseClicked(msg);
+			//after processing click depending on x-y AND loggedin is true, change to different screen for deposit/withdraw/transfer
 		    break;
 
 		case KP_KeyPressed:
@@ -55,10 +61,21 @@ public class ATMSS extends AppThread {
 		    processKeyPressed(msg);
 		    break;
 
-		case CR_CardInserted:
-		    log.info("CardInserted: " + msg.getDetails());
+			case CR_CardInserted:		//if receive card inserted from cardreader, do:
+				log.info("CardInserted: " + msg.getDetails());
+				cardNum = msg.getDetails();
+				getPin = true;		//if we are now looking for pin,
+				keypadMBox.send(new Msg(id, mbox, Msg.Type.Alert, ""));
+		    //if card inserted proceed to ask pin (send msg to ask for PIN)
 		    break;
-
+			case LoggedIn: //BAMSHandler send msg back and indicate success
+			//if success login return some boolean variable that enable all methods that need login to be true to act
+			loggedIn = true;
+			getPin = false; //on login success, no need pin anymore
+			touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.LoggedIn, "Success")); //change screen to main menu to select transaction
+			//ignore the password validation temporarily
+			//send verification success notification to touchscreen display so that screen is changed
+			break;
 		case Denom_sum:
 			log.info("CashDeposit Denominations: " + msg.getDetails());
 			break;
@@ -99,14 +116,19 @@ public class ATMSS extends AppThread {
     private void processKeyPressed(Msg msg) {
         // *** The following is an example only!! ***
         if (msg.getDetails().compareToIgnoreCase("Cancel") == 0) {
-	    cardReaderMBox.send(new Msg(id, mbox, Msg.Type.CR_EjectCard, ""));
-	} else if (msg.getDetails().compareToIgnoreCase("1") == 0) {
-	    touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_UpdateDisplay, "BlankScreen"));
-	} else if (msg.getDetails().compareToIgnoreCase("2") == 0) {
-	    touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_UpdateDisplay, "MainMenu"));
-	} else if (msg.getDetails().compareToIgnoreCase("3") == 0) {
-	    touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_UpdateDisplay, "Confirmation"));
-	}
+			cardReaderMBox.send(new Msg(id, mbox, Msg.Type.CR_EjectCard, ""));
+			pin="";		//if transaction canceled, reset pin variable
+		} else if (msg.getDetails().compareToIgnoreCase("Erase") == 0){
+			pin="";		//if transaction canceled, reset pin variable
+		}else if (getPin && (msg.getDetails().compareToIgnoreCase("Enter") == 0)){
+        	//send variables cardNum and pin to BAMS for login
+		}else if (msg.getDetails().compareToIgnoreCase("1") == 0) {
+			touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_UpdateDisplay, "BlankScreen"));
+		} else if (msg.getDetails().compareToIgnoreCase("2") == 0) {
+			touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_UpdateDisplay, "MainMenu"));
+		} else if (msg.getDetails().compareToIgnoreCase("3") == 0) {
+			touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_UpdateDisplay, "Confirmation"));
+		}
     } // processKeyPressed
 
 
