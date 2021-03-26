@@ -1,0 +1,49 @@
+210326-19:22:02 [INFO] -- 
+210326-19:22:02 [INFO] -- 
+210326-19:22:02 [INFO] -- ============================================================
+210326-19:22:02 [INFO] -- ATMSSStarter: Application Starting...
+210326-19:22:03 [INFO] -- TouchDisplayHandler: starting...
+210326-19:22:03 [INFO] -- CardReaderHandler: starting...
+210326-19:22:03 [INFO] -- KeypadHandler: starting...
+210326-19:22:03 [INFO] -- BAMSThreadHandler: starting...
+210326-19:22:03 [INFO] -- BuzzerHandler: starting...
+210326-19:22:03 [INFO] -- timer: starting...
+210326-19:22:03 [INFO] -- DepositSlotHandler: starting...
+210326-19:22:03 [INFO] -- DispenserSlotHandler: starting...
+210326-19:22:03 [INFO] -- ATMSS: starting...
+210326-19:22:03 [INFO] -- AdvicePrinterHandler: starting...
+210326-19:22:11 [INFO] -- CardReaderHandler: card inserted
+210326-19:22:11 [INFO] -- CardInserted: 2026-6202
+210326-19:22:11 [INFO] -- KeypadHandler: alert user-- 
+210326-19:22:11 [INFO] -- TouchDisplayHandler: update display -- PIN Required
+210326-19:22:11 [INFO] -- TouchDisplayHandler: loading fxml: TouchDisplayEmulator.fxml
+210326-19:22:11 [WARNING] -- TouchDisplayHandler: At this moment, the program will give a lot of errors or no respond after sending the PIN for validation
+210326-19:22:12 [INFO] -- KeyPressed: 8
+210326-19:22:12 [INFO] -- TouchDisplayHandler: update display -- enterPIN
+210326-19:22:12 [INFO] -- KeyPressed: 9
+210326-19:22:12 [INFO] -- TouchDisplayHandler: update display -- enterPIN
+210326-19:22:14 [INFO] -- KeyPressed: Erase
+210326-19:22:14 [INFO] -- TouchDisplayHandler: update display -- erasePIN
+210326-19:22:14 [SEVERE] -- TouchDisplayHandler: update display with unknown display type -- erasePIN
+210326-19:22:14 [INFO] -- KeyPressed: 1
+210326-19:22:14 [INFO] -- TouchDisplayHandler: update display -- enterPIN
+210326-19:22:15 [INFO] -- KeyPressed: 2
+210326-19:22:15 [INFO] -- TouchDisplayHandler: update display -- enterPIN
+210326-19:22:15 [INFO] -- KeyPressed: 3
+210326-19:22:15 [INFO] -- TouchDisplayHandler: update display -- enterPIN
+210326-19:22:15 [INFO] -- KeyPressed: 4
+210326-19:22:15 [INFO] -- TouchDisplayHandler: update display -- enterPIN
+210326-19:22:15 [INFO] -- KeyPressed: 5
+210326-19:22:15 [INFO] -- TouchDisplayHandler: update display -- enterPIN
+210326-19:22:16 [INFO] -- KeyPressed: 6
+210326-19:22:16 [INFO] -- TouchDisplayHandler: update display -- enterPIN
+210326-19:22:16 [INFO] -- KeyPressed: 7
+210326-19:22:16 [INFO] -- TouchDisplayHandler: update display -- enterPIN
+210326-19:22:17 [INFO] -- KeyPressed: 8
+210326-19:22:17 [INFO] -- TouchDisplayHandler: update display -- enterPIN
+210326-19:22:17 [INFO] -- KeyPressed: 9
+210326-19:22:17 [INFO] -- TouchDisplayHandler: update display -- enterPIN
+210326-19:22:18 [INFO] -- KeyPressed: Enter
+210326-19:22:18 [INFO] -- ATMSS : verifying cardnum and pin
+210326-19:22:18 [INFO] -- pin:123456
+210326-19:22:18 [INFO] -- BAMSThreadHandler: terminating...
