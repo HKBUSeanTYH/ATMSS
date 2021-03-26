@@ -81,6 +81,9 @@ public class TouchDisplayEmulator extends TouchDisplayHandler {
                 touchDisplayEmulatorController.changePIN();
                 break;
 
+            case "erasePIN":
+                touchDisplayEmulatorController.erasePIN();
+
             default:
                 log.severe(id + ": update display with unknown display type -- " + msg.getDetails());
                 break;
