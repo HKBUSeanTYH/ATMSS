@@ -137,8 +137,10 @@ public class ATMSS extends AppThread {
 			pin="";		//if transaction canceled, reset pin variable
 			touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_UpdateDisplay, "erasePIN"));
 		}else if (getPin && (msg.getDetails().compareToIgnoreCase("Enter") == 0)){
-        	// Set maximum password length to 6
-			pin = pin.substring(0, 9);
+        	// Set maximum password length to 9
+			if (pin.length() > 9) {
+				pin = pin.substring(0, 9);
+			}
             log.info(id+" : verifying cardnum and pin");
         	bamsThreadMBox.send(new Msg(id, mbox, Msg.Type.Verify, cardNum+" "+pin));
         	log.info("pin:"+pin);
