@@ -39,8 +39,8 @@ public class ATMSS extends AppThread {
     private MBox DispenserSlotMBox;
     private MBox AdvicePrinterMBox;
     private MBox BuzzerMBox;
-    private MBox bamsThreadMBox;
     private MBox ErrorSimulatorMBox;
+    private MBox bamsThreadMBox;
 
     //------------------------------------------------------------
     // ATMSS
@@ -243,7 +243,6 @@ public class ATMSS extends AppThread {
                         //this situation should happen when loggedIn is false
                         malfunctions = "Out of Service";
                         touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_UpdateDisplay, "Welcome_" + denom100 + " " + denom500 + " " + denom1000 + "/" + malfunctions));
-                        notOperate();
                     }
 
                     break;
@@ -326,9 +325,7 @@ public class ATMSS extends AppThread {
                                 touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Error, msg.getDetails() + "\n\nPlease contact the bank"));
                                 break;
                             }
-                            touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_UpdateDisplay, "Welcome_" + denom100 + " " + denom500 + " " + denom1000 + "/" + malfunctions));
-                            allReset();
-                            notOperate();
+                            
                             break;
 
                         case "TouchDisplayHandler":
@@ -712,16 +709,6 @@ public class ATMSS extends AppThread {
             }
         }
         DispenserSlotMBox.send(new Msg(id, mbox, Msg.Type.DenomsInventoryCheck, ""));
-    }
-
-    private void notOperate() {
-        AdvicePrinterMBox.send(new Msg(id, mbox, Msg.Type.Error, "Out of Service"));
-        bamsThreadMBox.send(new Msg(id, mbox, Msg.Type.Error, "Out of Service"));
-        BuzzerMBox.send(new Msg(id, mbox, Msg.Type.Error, "Out of Service"));
-        cardReaderMBox.send(new Msg(id, mbox, Msg.Type.Error, "Out of Service"));
-        DepositSlotMBox.send(new Msg(id, mbox, Msg.Type.Error, "Out of Service"));
-        DispenserSlotMBox.send(new Msg(id, mbox, Msg.Type.Error, "Out of Service"));
-        keypadMBox.send(new Msg(id, mbox, Msg.Type.Error, "Out of Service"));
     }
 
 }

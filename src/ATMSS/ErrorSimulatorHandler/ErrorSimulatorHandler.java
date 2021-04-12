@@ -23,34 +23,50 @@ public class ErrorSimulatorHandler extends HWHandler {
     public void processError(String msg){
         String[] stringToken = msg.split(" ");
 
-        if (stringToken.length < 3){
+        if (stringToken.length < 2 ){
             log.info(id + ": incorrect simulation length" + msg);
             return;
         }
 
+        String token = "";
+        //basically if length is 2 it does nothing
+        //but if length is 3 or more, we can concatenate the tokens to get token
+        for (int i=2; i<stringToken.length; i++){
+            if (token.equals("")){
+                token = stringToken[i];
+            }else{
+                token = token+" "+stringToken[i];
+            }
+        }
+
         switch(stringToken[0]){
             case "Error":
-                switch(stringToken[1]){
+                switch(stringToken[1].trim()){
                     case "AdvicePrinterHandler":
-                        break;
                     case "BuzzerHandler":
-                        break;
                     case "BAMSThreadHandler":
-                        break;
                     case "DepositSlotHandler":
-                        break;
                     case "DispenserSlotHandler":
-                        break;
                     case "KeypadHandler":
-                        break;
                     case "CardReaderHandler":
-                        break;
                     case "TouchDisplayHandler":
+                        log.info(id+" : simulating an error");
+                        atmss.send(new Msg(stringToken[1], mbox, Msg.Type.Error, token));
                         break;
+
                     default:
-                        log.info(id+ " :Error Simulator does not recognize second keyword!");
+                        log.info(id+ " :Error Simulator does not recognize second keyword! -- "+msg);
                 }
                 break;
+//            case "Reset":
+//                break;
+//            case "Shutdown":
+//                if (stringToken[1].equals("ALL")){
+//                    atmss.send(new Msg(id, mbox, Msg.Type.ShutdownReq, ""));
+//                }else{
+//                    log.info(id+ " :Error Simulator does not recognize second keyword!");
+//                }
+//                break;
             default:
                 log.info(id+ " : Error Simulator does not recognize first keyword!");
         }
