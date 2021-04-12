@@ -12,7 +12,7 @@ import java.util.logging.*;
 public class bamsThreadHandler extends AppThread {
     protected MBox atmss = null;
     private BAMSHandler bams = null;
-    private final String urlPrefix = "http://cslinux0.comp.hkbu.edu.hk/comp4107_20-21_grp11/";    //http://cslinux0.comp.hkbu.edu.hk/~comp4107/test/
+    private final String urlPrefix = "http://cslinux0.comp.hkbu.edu.hk/comp4107_20-21_grp11/index.php";    //http://cslinux0.comp.hkbu.edu.hk/~comp4107/test/
     private static String credential = "";
     private int BAMSTimerID = -1;
     private static boolean operate = true;
