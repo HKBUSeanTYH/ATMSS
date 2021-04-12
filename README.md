@@ -15,6 +15,8 @@ BAMSHandler,
 BuzzerHandler,
 CardReaderHandler,
 DepositSlotHandler,
+DispenserSlotHandler,
+ErrorSimulatorHandler,
 HWHandler,
 KeypadHandler,
 TouchDisplayHandler.
@@ -42,6 +44,14 @@ continue transaction, or end transaction(also has options for printing advice).
 Once done with testing the functions, click to end transaction. TouchDisplay
 will return to main page, and the cardReader will eject card. After removing,
 you can click the X button to terminate ATMSS system.
+
+\*Error Simulator is a basic error simulator to simulate simple errors that the ATMSS can handle.
+The format for issuing an error simulation is:
+Error + [Handler]. For example, "Error KeypadHandler" or "Error AdvicePrinterHandler".
+Take note to use Error with a capital E and follow the proper capitalization for each of the handlers
+(ie. The directories listed above)
+Error Simulator generally takes a string comprised of 2 tokens. Advanced commands are not fully complete, thus
+any more tokens, 3rd token and above will just be there without any functionality.
 ```
 
 # README.md for Group11 Database
