@@ -32,7 +32,9 @@ Instructions:
 Optional: From link above, download JavaFX.
 
 Referring to link above, import the modules and library for JavaFX.
-Detailed instructions can be found under JavaFX and IntelliJ 
+Detailed instructions can be found under JavaFX and IntelliJ.
+It would be good for you to reimport the modules and library, since this the path
+will vary between users.
 
 click Build (next to Refactor and Run) and Build Project (Ctrl+F9). After that,
 Run ATMSSEmulatorStarter.java. After all the GUIs pop up, you can insert a
