@@ -2,6 +2,7 @@ package ATMSS.BuzzerHandler.Emulator;
 
 import ATMSS.ATMSSStarter;
 import ATMSS.BuzzerHandler.BuzzerHandler;
+import AppKickstarter.misc.Msg;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -16,7 +17,7 @@ public class BuzzerEmulator extends BuzzerHandler {
     private Stage myStage;
     private BuzzerEmulatorController buzzerEmulatorController;
 
-    public BuzzerEmulator(String id, ATMSSStarter atmssStarter) throws Exception {
+    public BuzzerEmulator(String id, ATMSSStarter atmssStarter) {
         super(id, atmssStarter);
         this.atmssStarter = atmssStarter;
         this.id = id;
@@ -42,7 +43,7 @@ public class BuzzerEmulator extends BuzzerHandler {
         myStage.show();
     }
 
-    protected void alert(String msg) {
+    protected boolean alert(String msg) {
         super.alert(msg);
         Platform.runLater(new Runnable() {
             @Override
@@ -50,16 +51,21 @@ public class BuzzerEmulator extends BuzzerHandler {
                 myStage.toFront();//move the stage to the front
                 buzzerEmulatorController.sound();
                 buzzerEmulatorController.appendTextArea(msg);
-                //shake the stage
-//				for (int i = 0; i < 10; i++) {
-//					myStage.setX(myStage.getX()+10);
-//					myStage.setX(myStage.getX()-10);
-//					myStage.setX(myStage.getX()-10);
-//					myStage.setX(myStage.getX()+10);
-//				}
             }
         });
+        return true;
+    }
 
+    protected void reset() {
+        super.reset();
+        diagnostic();
+    }
 
+    private void diagnostic() {
+        if (alert("")) {
+            atmss.send(new Msg(id, mbox, Msg.Type.Reset, "healthy"));
+        } else {
+            atmss.send(new Msg(id, mbox, Msg.Type.Reset, "reset failure"));
+        }
     }
 }

@@ -11,6 +11,7 @@ import java.util.StringTokenizer;
 // ATMSS
 public class ATMSS extends AppThread {
     private int pollingTime;
+    private final int bamsPollTime = 20000;
     private int atmssTimerID = -1;
     private int depositTimerID = -1;
     private int dispenseTimerID = -1;
@@ -39,7 +40,6 @@ public class ATMSS extends AppThread {
     private MBox DispenserSlotMBox;
     private MBox AdvicePrinterMBox;
     private MBox BuzzerMBox;
-    private MBox ErrorSimulatorMBox;
     private MBox bamsThreadMBox;
 
     //------------------------------------------------------------
@@ -54,7 +54,7 @@ public class ATMSS extends AppThread {
     // run
     public void run() {
         atmssTimerID = Timer.setTimer(id, mbox, pollingTime);
-        BAMSResponseTimerID = Timer.setTimer(id, mbox, 17000);
+        BAMSResponseTimerID = Timer.setTimer(id, mbox, bamsPollTime);
         log.info(id + ": starting...");
 
         cardReaderMBox = appKickstarter.getThread("CardReaderHandler").getMBox();
@@ -64,16 +64,18 @@ public class ATMSS extends AppThread {
         DispenserSlotMBox = appKickstarter.getThread("DispenserSlotHandler").getMBox();
         AdvicePrinterMBox = appKickstarter.getThread("AdvicePrinterHandler").getMBox();
         BuzzerMBox = appKickstarter.getThread("BuzzerHandler").getMBox();
-        ErrorSimulatorMBox = appKickstarter.getThread("ErrorSimulatorHandler").getMBox();
         bamsThreadMBox = appKickstarter.getThread("BAMSThreadHandler").getMBox();
+
+        HWreset();
 
         for (boolean quit = false; !quit; ) {
             Msg msg = mbox.receive();
 
             log.fine(id + ": message received: [" + msg + "].");
             if (!msg.getType().equals(Msg.Type.TimesUp) || !msg.getType().equals(Msg.Type.PollAck)) {
+                log.info(id + ": bams timer reset");
                 Timer.cancelTimer(id, mbox, BAMSResponseTimerID);
-                BAMSResponseTimerID = Timer.setTimer(id, mbox, BAMSResponseTimerID, 17000);
+                Timer.setTimer(id, mbox, bamsPollTime, BAMSResponseTimerID);
             }
 
             switch (msg.getType()) {
@@ -125,15 +127,13 @@ public class ATMSS extends AppThread {
 
                 case GetAccount:        //send BAMSHandler msg and ask for the accounts info of the card
                     bamsThreadMBox.send(new Msg(id, mbox, Msg.Type.GetAccount, cardNum));
-//				touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_SelectAccount, msg.getDetails()));
                     break;
 
                 case ReceiveAccount:    //receive accounts info of specific card from BAMS
-                    //if !operating account = "" && msg.getDetails() has no "/", return error
                     if (!selectedAcc.equals("") && !msg.getDetails().contains("/")) {       //only for money transfer at this moment
                         //this card has only one account and cannot do money transfer
                         touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Error, "This card has only one account\n\nCannot do money transfer"));
-                    } else {        //initial account selection at this moment
+                    } else {
                         touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_SelectAccount, transaction + "_" + msg.getDetails()));
                     }
                     break;
@@ -243,6 +243,7 @@ public class ATMSS extends AppThread {
                         //this situation should happen when loggedIn is false
                         malfunctions = "Out of Service";
                         touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_UpdateDisplay, "Welcome_" + denom100 + " " + denom500 + " " + denom1000 + "/" + malfunctions));
+                        notOperate();
                     }
 
                     break;
@@ -253,7 +254,7 @@ public class ATMSS extends AppThread {
 
                 case BAMSAck:
                     Timer.cancelTimer(id, mbox, BAMSResponseTimerID);
-                    BAMSResponseTimerID = Timer.setTimer(id, mbox, BAMSResponseTimerID, 17000);
+                    Timer.setTimer(id, mbox, bamsPollTime, BAMSResponseTimerID);
                     log.info("BAMSAck: " + msg.getDetails());
                     break;
 
@@ -271,6 +272,13 @@ public class ATMSS extends AppThread {
                         log.warning(id + ": Denoms inventory keeping incorrect");
                     }
                     break;
+
+                case Reset:
+                    if (msg.getDetails().equals("healthy")) {
+                        log.info(id + " " + msg.getSender() + " reset: healthy");
+                        touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_UpdateDisplay, "Welcome_" + denom100 + " " + denom500 + " " + denom1000 + "/" + malfunctions));
+                        break;
+                    } //others are reset failure, the consequence equals to error
 
                 case Error:     //receive error that cannot fix by itself
                     log.severe(id + ": " + msg);
@@ -324,15 +332,18 @@ public class ATMSS extends AppThread {
                                 cardReaderMBox.send(new Msg(id, mbox, Msg.Type.CR_RetainCard, ""));
                                 touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Error, msg.getDetails() + "\n\nPlease contact the bank"));
                                 break;
+                            } else {
+                                touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.TD_UpdateDisplay, "Welcome_" + denom100 + " " + denom500 + " " + denom1000 + "/" + malfunctions));
+                                notOperate();
                             }
-                            
                             break;
 
                         case "TouchDisplayHandler":
                             //shut down directly
+                            notOperate();
+                            touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Shutdown, ""));
                             break;
                     }
-//                    BuzzerMBox.send(new Msg(id, mbox, Msg.Type.Error, "Error occurred!"));
                     break;
 
                 case ErrorRedirect:         //redirect error page to another page
@@ -368,6 +379,11 @@ public class ATMSS extends AppThread {
                             }
                             break;
                     }
+                    break;
+
+                case Shutdown:
+                    //accept shutdown okay or failed
+                    log.info(id + " " + msg.getSender() + ": shutdown: " + msg.getDetails());
                     break;
 
                 default:
@@ -544,9 +560,11 @@ public class ATMSS extends AppThread {
                         case "Confirm Amount":
                             //confirm the amount input and send bams deposit request
                             bamsThreadMBox.send(new Msg(id, mbox, Msg.Type.Deposit, cardNum + " " + selectedAcc + " " + amountTyped));
+                            DepositSlotMBox.send(new Msg(id, mbox, Msg.Type.Deposit, "Confirm"));
                             break;
 
-                        case "Cancel":          //reinput amount, need to eject the money?
+                        case "Cancel":
+                            //the deposit slot does not take the money until confirm amount is pressed
                             //set transaction to true
                             amountTyped = "";
                             depositTimerID = Timer.setTimer(id, mbox, 15000);
@@ -711,4 +729,24 @@ public class ATMSS extends AppThread {
         DispenserSlotMBox.send(new Msg(id, mbox, Msg.Type.DenomsInventoryCheck, ""));
     }
 
+    private void notOperate() {
+        AdvicePrinterMBox.send(new Msg(id, mbox, Msg.Type.Shutdown, ""));
+        bamsThreadMBox.send(new Msg(id, mbox, Msg.Type.Shutdown, ""));
+        BuzzerMBox.send(new Msg(id, mbox, Msg.Type.Shutdown, ""));
+        cardReaderMBox.send(new Msg(id, mbox, Msg.Type.Shutdown, ""));
+        DepositSlotMBox.send(new Msg(id, mbox, Msg.Type.Shutdown, ""));
+        DispenserSlotMBox.send(new Msg(id, mbox, Msg.Type.Shutdown, ""));
+        keypadMBox.send(new Msg(id, mbox, Msg.Type.Shutdown, ""));
+    }
+
+    private void HWreset() {
+        AdvicePrinterMBox.send(new Msg(id, mbox, Msg.Type.Reset, ""));
+        bamsThreadMBox.send(new Msg(id, mbox, Msg.Type.Reset, ""));
+        BuzzerMBox.send(new Msg(id, mbox, Msg.Type.Reset, ""));
+        cardReaderMBox.send(new Msg(id, mbox, Msg.Type.Reset, ""));
+        DepositSlotMBox.send(new Msg(id, mbox, Msg.Type.Reset, ""));
+        DispenserSlotMBox.send(new Msg(id, mbox, Msg.Type.Reset, ""));
+        keypadMBox.send(new Msg(id, mbox, Msg.Type.Reset, ""));
+        touchDisplayMBox.send(new Msg(id, mbox, Msg.Type.Reset, ""));
+    }
 }

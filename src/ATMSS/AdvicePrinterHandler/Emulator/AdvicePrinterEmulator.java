@@ -3,6 +3,7 @@ package ATMSS.AdvicePrinterHandler.Emulator;
 import ATMSS.ATMSSStarter;
 import ATMSS.AdvicePrinterHandler.AdvicePrinterHandler;
 
+import AppKickstarter.misc.Msg;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -27,9 +28,9 @@ public class AdvicePrinterEmulator extends AdvicePrinterHandler {
         Parent root;
         myStage = new Stage();
         FXMLLoader loader = new FXMLLoader();
-        String fxmlName = "AdvicePrinterEmulator.fxml";        //Sean:      create a DepositSlotEmulator.fxml
+        String fxmlName = "AdvicePrinterEmulator.fxml";
         loader.setLocation(AdvicePrinterEmulator.class.getResource(fxmlName));
-        root = loader.load();       //error?
+        root = loader.load();
         AdvicePrinterEmulatorController = (AdvicePrinterEmulatorController) loader.getController();
         AdvicePrinterEmulatorController.initialize(id, atmssStarter, log, this);
         myStage.initStyle(StageStyle.DECORATED);
@@ -56,5 +57,19 @@ public class AdvicePrinterEmulator extends AdvicePrinterHandler {
     	AdvicePrinterEmulatorController.appendTextArea("Printing Advice...");
         AdvicePrinterEmulatorController.appendTextArea(msg);
         AdvicePrinterEmulatorController.clearAdvice();
+    }
+
+    protected void reset() {
+        super.reset();
+        diagnostic();
+    }
+
+    private void diagnostic() {
+        handleAdvicePrint("");
+        if (AdvicePrinterEmulatorController.takeAdvice(true)) {
+            atmss.send(new Msg(id, mbox, Msg.Type.Reset, "healthy"));
+        } else {
+            atmss.send(new Msg(id, mbox, Msg.Type.Reset, "reset failure"));
+        }
     }
 }

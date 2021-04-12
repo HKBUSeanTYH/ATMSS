@@ -70,10 +70,6 @@ public class TouchDisplayEmulator extends TouchDisplayHandler {
 
             case "Cash Withdrawal":
 
-//            case "enterPIN":
-//                touchDisplayEmulatorController.changePIN();
-//                break;
-
             case "erasePIN":
                 reloadStage("TouchDisplayEmulator.fxml", msgDetails[0]);
                 break;
@@ -159,7 +155,6 @@ public class TouchDisplayEmulator extends TouchDisplayHandler {
         } else if (TouchDisplayEmulatorController.getCurrentPage() == 6) {
             reloadStage("TouchDisplayEmulator.fxml", "Cash Withdrawal", typed);
         }
-//        touchDisplayEmulatorController.changeAmount(typed);
     }
 
     protected void handleErrorPage(String details) {
@@ -167,10 +162,30 @@ public class TouchDisplayEmulator extends TouchDisplayHandler {
         reloadStage("TouchDisplayEmulator.fxml", "Error", details);
     }
 
+    protected void shutdown() {
+        super.shutdown();
+        try {
+            reloadStage("TouchDisplayEmulator.fxml", "BlankScreen");
+            atmss.send(new Msg(id, mbox, Msg.Type.Shutdown, "shutdown okay"));
+        } catch (Exception e) {
+            atmss.send(new Msg(id, mbox, Msg.Type.Shutdown, "shutdown failed"));
+        }
+    }
+
+    protected void reset() {
+        super.reset();
+        try {
+            reloadStage("TouchDisplayEmulator.fxml", "Welcome");
+            atmss.send(new Msg(id, mbox, Msg.Type.Reset, "healthy"));
+        } catch (Exception e) {
+            atmss.send(new Msg(id, mbox, Msg.Type.Reset, "reset failure"));
+        }
+    }
+
     //------------------------------------------------------------
     // reloadStage
-    private void reloadStage(String fxmlFName, String detail) {
-        reloadStage(fxmlFName, detail, "");
+    private void reloadStage(String fxmlFName, String page) {
+        reloadStage(fxmlFName, page, "");
     }
 
     private void reloadStage(String fxmlFName, String page, String detail) {
@@ -303,6 +318,7 @@ public class TouchDisplayEmulator extends TouchDisplayHandler {
                 } catch (Exception e) {
                     log.severe(id + ": failed to load " + fxmlFName);
                     e.printStackTrace();
+                    atmss.send(new Msg(id, mbox, Msg.Type.Error, ""));
                 }
             }
         });

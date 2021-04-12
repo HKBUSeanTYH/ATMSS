@@ -1,12 +1,8 @@
 package ATMSS.DispenserSlotHandler.Emulator;
 
-import java.util.StringTokenizer;
-
 import ATMSS.ATMSSStarter;
-import ATMSS.DepositSlotHandler.Emulator.DepositSlotEmulator;
-import ATMSS.DepositSlotHandler.Emulator.DepositSlotEmulatorController;
 import ATMSS.DispenserSlotHandler.DispenserSlotHandler;
-
+import AppKickstarter.misc.Msg;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -78,5 +74,22 @@ public class DispenserSlotEmulator extends DispenserSlotHandler {
     protected void handleDenomsInventoryCheck() {
         super.handleDenomsInventoryCheck();
         DispenserSlotEmulatorController.checkDenomsInventory();
+    }
+
+    protected void reset() {
+        super.reset();
+        diagnostic();
+        DispenserSlotEmulatorController.DispenserSlotTextArea.setText("");
+    }
+
+    private void diagnostic() {
+        handleDispense("OpenSlot");
+        handleDispenseCash("0 0 0");
+        if (DispenserSlotEmulatorController.dispense(true)) {
+            handleDispense("CloseSlot");
+            atmss.send(new Msg(id, mbox, Msg.Type.Reset, "healthy"));
+        } else {
+            atmss.send(new Msg(id, mbox, Msg.Type.Reset, "reset failure"));
+        }
     }
 }

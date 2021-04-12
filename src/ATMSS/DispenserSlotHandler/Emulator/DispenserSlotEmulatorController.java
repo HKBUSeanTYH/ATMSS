@@ -21,9 +21,9 @@ public class DispenserSlotEmulatorController {
     private MBox DispenserSlotMBox;
 
     private boolean dispense = false;
-    private static int denom100 = 10000;                    //this might not be necessary, since the denominations are being sent to dispenser to pr
-    private static int denom500 = 10000;                    //we do not need to keep track or modify the values
-    private static int denom1000 = 10000;                  //we need to keep track of the money notes inventory
+    private static int denom100 = 10000;
+    private static int denom500 = 10000;
+    private static int denom1000 = 10000;
 
     public TextField amtField;
     public TextField DispenserSlotStatusField;
@@ -43,26 +43,10 @@ public class DispenserSlotEmulatorController {
     public void buttonPressed(ActionEvent actionEvent) {
         Button btn = (Button) actionEvent.getSource();
 
-        switch (btn.getText()) {
-
-            case "Withdraw":
-                if (dispense && (amtField.getText().length() != 0)) {
-                    DispenserSlotTextArea.appendText("Withdrawing " + amtField.getText() + "\n");
-                    DispenserSlotMBox.send(new Msg(id, DispenserSlotMBox, Msg.Type.DispenseFinish, amtField.getText()));        //when finish withdraw close the slot
-                    amtField.setText("");
-                    //denom100 = denom500 = denom1000 = 0;
-                } else {
-                    DispenserSlotTextArea.appendText("Slot not open! Unable to withdraw!\n");
-                }
-
-                //DispenserSlotMBox.send(new Msg(id, DispenserSlotMBox, Msg.Type.CR_CardInserted, amtField.getText()));
-                //DispenserSlotTextArea.appendText("Sending " + amtField.getText()+"\n");
-                //DispenserSlotStatusField.setText("Slot Opened");
-                break;
-
-            default:
-                log.warning(id + ": unknown button: [" + btn.getText() + "]");
-                break;
+        if ("Withdraw".equals(btn.getText())) {
+            dispense(false);
+        } else {
+            log.warning(id + ": unknown button: [" + btn.getText() + "]");
         }
     } // buttonPressed
 
@@ -135,6 +119,17 @@ public class DispenserSlotEmulatorController {
         }
     }
 
-    //check inventory is needed
-
+    protected boolean dispense(boolean diagnostic) {
+        if (dispense && (amtField.getText().length() != 0)) {
+            DispenserSlotTextArea.appendText("Withdrawing " + amtField.getText() + "\n");
+            if (!diagnostic) {
+                DispenserSlotMBox.send(new Msg(id, DispenserSlotMBox, Msg.Type.DispenseFinish, amtField.getText()));        //when finish withdraw close the slot
+            }
+            amtField.setText("");
+            return true;
+        } else {
+            DispenserSlotTextArea.appendText("Slot not open! Unable to withdraw!\n");
+            return false;
+        }
+    }
 }
