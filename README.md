@@ -81,3 +81,8 @@ STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION | comp4107_grp11@% | utf8 | utf8_gene
 
 Description: Can't update the amount less than 0, otherwise will show error.
 ```
+
+DB Reset Link:
+```
+http://cslinux0.comp.hkbu.edu.hk/comp4107_20-21_grp11/reset.php
+```
